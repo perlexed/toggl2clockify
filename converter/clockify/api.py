@@ -443,7 +443,15 @@ class ClockifyAPI:
 
         # generate params json
         params = project.excrete(self)
-        retval = self.request(url, email, body=params, typ="POST")
+        try:
+            retval = self.request(url, email, body=params, typ="POST")
+        except AttributeError:
+            self.logger.warning(
+                "Error adding project  %s, no user could be get",
+                project.name
+            )
+            return RetVal.ERR
+
         if retval.status_code == 201:
             self.projects.need_resync = True
             retval = RetVal.OK

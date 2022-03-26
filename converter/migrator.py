@@ -417,8 +417,10 @@ class Clue:
                 entry_status.num_queued + 1,
                 entry_status.num_entries,
             )
-
-            email = self.verify_email(t_entry["uid"], t_entry["user"])
+            try:
+                email = self.verify_email(t_entry["uid"], t_entry["user"])
+            except RuntimeError:
+                break
 
             if email is None:
                 entry_status.add_skip()

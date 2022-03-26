@@ -89,11 +89,14 @@ class Entry:
         self.workspace_id = api.get_workspace_id(self.workspace)
         self.user_id = api.get_user_id(self.email)
         if self.project_name is not None:
-            self.proj_id = api.get_project_id(
-                self.project_name, self.client_name, self.workspace
-            )
+            try:
+                self.proj_id = api.get_project_id(
+                    self.project_name, self.client_name, self.workspace
+                )
+            except RuntimeError:
+                self.proj_id = None
 
-            if self.task_name is not None:
+            if (self.task_name is not None) and (self.proj_id is not None):
                 proj_tasks = api.get_tasks_from_project_id(self.workspace, self.proj_id)
                 self.task_id = get_task_id_from_name(self.task_name, proj_tasks)
                 self.logger.info(
@@ -228,10 +231,15 @@ class EntryQuery:
                 params["start"] = self.start
 
             if self.project_name is not None:
-                proj_id = api.get_project_id(
-                    self.project_name, self.client_name, self.workspace
-                )
-                params["project"] = proj_id
+                try:
+                    proj_id = api.get_project_id(
+                        self.project_name, self.client_name, self.workspace
+                    )
+                except RuntimeError:
+                    proj_id = None
+
+                if proj_id is not None:
+                    params["project"] = proj_id
 
             self.api_dict = params
         return self.api_dict
